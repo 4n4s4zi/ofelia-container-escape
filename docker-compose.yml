@@ -1,0 +1,23 @@
+services:
+
+  nginx:
+    image: nginx
+    volumes:
+      - &output_mount ${OUTPUT_DIR:-/tmp/${COMPOSE_PROJECT_NAME}}/:/tmp
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.nginx-uname-job.schedule: "@every 5s"
+      ofelia.job-exec.nginx-uname-job.command: "uname -a"
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    depends_on:
+      - nginx
+    command: daemon --docker
+    volumes:
+      - *output_mount
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      ofelia.save-folder: "/tmp/"
+      ofelia.job-local.ofelia-date-job-local.schedule: "@every 5s"
+      ofelia.job-local.ofelia-date-job-local.command: "date"
